@@ -4,20 +4,50 @@ Aplicación Android de gestión académica para la **Escuela Escritora Marcela P
 Asignatura **DSY1105**, sección **007V** · Evaluación Parcial 3 (EP3).
 
 Aplicación Android (Kotlin, Jetpack Compose con Material 3, MVVM con `ViewModel` + `StateFlow` y Room) para el
-apoyo pedagógico de 3° básico en cuatro asignaturas. El proyecto trae **todos los requerimientos funcionales del
-caso (RF-00 a RF-14) funcionando de forma local con Room** y el andamiaje de la Experiencia 3: una capa remota con
-Retrofit que debes completar para que la app trabaje contra un servidor (API REST), más pruebas unitarias, una
-prueba de interfaz y la generación de un APK firmado. Un interruptor **Modo local / Modo servidor** (sección 5) permite
-alternar entre las dos formas de trabajar sin recompilar.
+apoyo pedagógico de 3° básico en cuatro asignaturas. Esta entrega incluye **todos los requerimientos funcionales
+del caso (RF-00 a RF-14) funcionando en modo local con Room**, pruebas unitarias y el APK firmado. La capa remota
+con Retrofit (modo servidor) queda preparada pero pendiente por indicación del docente. Las secciones 1 a 12 son
+la documentación técnica de la base del proyecto.
 
 ## Integrantes
 
 | Integrante | Usuario de GitHub | Aporte en esta entrega |
 |---|---|---|
-| Fernando |  | Repositorio, ramas, arreglo de compilación, revisión de PR y entrega final |
+| Fernando | [fernaanndo](https://github.com/fernaanndo) | Repositorio, ramas, arreglo de compilación, revisión de PR y entrega final |
 | Felipe | [FelipeCassaretto](https://github.com/FelipeCassaretto) | APK firmado (llave `.jks`, `keystore.properties`, capturas) |
 | Jean | [Jeanrenel92](https://github.com/Jeanrenel92) | Pruebas unitarias nuevas (`ContenidosUtpLocalTest`) |
 | Bayron | [B4yr0n-web](https://github.com/B4yr0n-web) | README de la entrega y bitácora técnica de firma |
+
+## Funcionalidades
+
+- Los 15 requerimientos del caso (RF-00 a RF-14) funcionando en **modo local con Room**: login por perfil con validación por campo, autorización de contenidos por UTP (RF-01, RF-02, RN-04), planificación docente, material, desafíos y evaluación del estudiante, resultados con CSV e informe pedagógico. El detalle, en la sección 3.
+- Mensajes de éxito y error diferenciados, y confirmación antes de acciones destructivas.
+- Recursos nativos: vibración, selector de archivos del sistema (CSV) y reproductor de audio.
+- Pruebas unitarias (sección 8) y APK firmado (sección 9).
+
+## Endpoints
+
+API externa y microservicios: **pendientes por indicación del docente** (sin ambiente backend para esta entrega). La capa remota (`data/remote/`, Retrofit) queda preparada con sus `TODO(E3-n)`. La app se entrega y se defiende en **modo local**.
+
+## Cómo ejecutar
+
+1. Abrir la carpeta del proyecto en Android Studio (JDK 17, SDK 35) y esperar el Gradle Sync. No actualizar Gradle ni el AGP si lo sugiere.
+2. Run ▶ `app` en un emulador o dispositivo (API 24+). La app arranca en modo local con los datos de ejemplo.
+3. Entrar con los usuarios de prueba de la sección 2.
+4. Pruebas: `./gradlew testDebugUnitTest` (Windows: `gradlew.bat testDebugUnitTest`).
+5. APK firmado: `./gradlew assembleRelease` (sección 9). El APK ya generado está en `entrega/app-release.apk`.
+
+## Control de versiones
+
+Repositorio: https://github.com/fernaanndo/mpaz-ea3 (público).
+Flujo: `main` (entrega) ← `develop` (integración) ← una rama por tarea, todo por Pull Request.
+
+| Rama | Integrante | PR |
+|---|---|---|
+| `feature/apk-firmado` | Felipe | #2 |
+| `test/contenidos-utp` | Jean | #1 |
+| `docs/readme-correcciones` (sobre el README iniciado por Bayron) | Bayron y Fernando | — |
+| `develop → main` | Fernando | final |
 
 ---
 
@@ -229,13 +259,13 @@ Pruebas unitarias JVM (JUnit 4, sin emulador) en `app/src/test`:
 
 - **Ya funcionan**: reglas de negocio de `domain/` (acceso, contenidos, planificación, desafíos, evaluación, progreso, informe, CSV), coherencia de los datos de ejemplo, el contrato de los DTO (`ContratoDtoTest`) y la regla de hosts permitidos para `http` (`HostPermiteHttpTest`).
 - **Modo local (ya funcionan, 44 casos activos)**: `SelectorFuenteTest` (el selector elige la fuente según la preferencia y la relee en cada operación, también al cambiar de modo en caliente), `RepositorioLocalTest` (ingreso con hash local y cada acción con escritura con sus reglas: casos correctos y errores de RN-02, RN-03, RN-04, informe validado y CSV) y `ReglasModoLocalTest`. Usan una base en memoria (`AlmacenLocalMemoria` en `data/FakesLocal.kt`); no los marques con `@Ignore`.
+- **Agregadas en esta entrega**: `ContenidosUtpLocalTest` (6 casos de RF-01 y RF-02: aprobar un contenido rechazado, aprobar sin observación, reaprobar sin violar RN-04, rechazar un contenido inexistente y filtrar antes y después de aprobar). Total al ejecutar `./gradlew testDebugUnitTest`: **175 pruebas, 0 fallas, 47 omitidas** (las omitidas son los esqueletos de la capa API).
 - **Esqueletos con `@Ignore("E3: completar")`** (cada archivo lista los casos que debe cubrir): `ApiServiceMockWebServerTest`, `ErroresApiTest`, `MapeadoresTest`, `UrlServidorTest`, `RepositorioSincronizadoTest`. Al completar cada uno, quita el `@Ignore`. Entre todos suman más de 15 casos, incluidos 400/401/403/404/409, sin red, timeout, cuerpo mal formado, mapeadores y caché. `data/Fakes.kt` trae las utilidades ya hechas (ApiService, conectividad y copia local falsos).
 - **Prueba de interfaz** (`app/src/androidTest/.../LoginUiTest.kt`, 3 casos con `@Ignore`): se ejecuta en emulador o dispositivo con `./gradlew connectedDebugAndroidTest`.
 
-El reporte queda en `app/build/reports/tests/testDebugUnitTest/index.html`. Las pruebas del servidor están en `backend/test`
-(`cd backend && npm test`).
+El reporte queda en `app/build/reports/tests/testDebugUnitTest/index.html`.
 
-## 9. ## APK firmado
+## 9. APK firmado
 
 El APK de la entrega está firmado con esquemas **V1 (JAR)** y **V2 (APK Signature Scheme v2)**.
 
@@ -264,17 +294,28 @@ El APK de la entrega está firmado con esquemas **V1 (JAR)** y **V2 (APK Signatu
 4. Generar el APK: `./gradlew assembleRelease`. Queda en `app/build/outputs/apk/release/app-release.apk` y se copia a `entrega/`.
 5. Verificar la firma con `apksigner verify --verbose --print-certs app-release.apk`: debe indicar `v1 scheme: true` y `v2 scheme: true`.
 
-1. Crear una llave propia (una sola vez, exclusiva para esta entrega):
+**Capturas:**
 
-```
-keytool -genkeypair -v -keystore mi-llave.jks -alias mi-alias -keyalg RSA -keysize 2048 -validity 10000
-```
+![Verificación del APK firmado con apksigner](docs/capturas/apk_firmado.png)
 
-2. Copiar `keystore.properties.example` como `keystore.properties` (queda fuera de Git) y completar los cuatro datos
-   `MPAZPRO_STORE_FILE`, `MPAZPRO_STORE_PASSWORD`, `MPAZPRO_KEY_ALIAS` y `MPAZPRO_KEY_PASSWORD`. También se leen de
-   `~/.gradle/gradle.properties` o de variables de entorno con esos mismos nombres.
-3. Generar el APK: `./gradlew assembleRelease`. Queda en `app/build/outputs/apk/release/app-release.apk`, firmado con
-   esquemas V1 y V2 (están activados en `app/build.gradle.kts`).
+![Llave .jks y APK en el proyecto](docs/capturas/jks.png)
+
+**Bitácora técnica de la firma:**
+
+| Campo | Valor |
+|---|---|
+| Aplicación | MPAZ PRO 3° (`com.mpazpro3.app`) |
+| Versión | 1.0.0 (versionCode 1) |
+| Alias | `mpazpro3` |
+| Ruta del .jks | `app/keystore/mpazpro3-release.jks` |
+| Generación del .jks | 24-11-2026 17:54 |
+| Generación del APK | 24-11-2026 18:10 |
+| Firmas activas | V1 (JAR) y V2 (APK Signature Scheme v2) |
+| Algoritmo / tamaño | RSA 2048 |
+| Certificado | CN=Felipe Cassaretto, O=Duoc UC, L=San Bernardo, C=CL |
+| Huella SHA-256 | `0E:3F:44:D0:AB:D3:44:4B:DB:BF:92:45:03:60:25:75:2B:30:D3:DC:42:F6:7A:85:22:CA:BC:9B:38:4F:4F:02` |
+| APK entregado | `entrega/app-release.apk` |
+| Verificación | `apksigner verify --verbose --print-certs` → v1: true, v2: true |
 
 `.gitignore` excluye `local.properties`, `build/`, `.gradle/`, `.idea/` y `.kotlin/`. Para la evaluación, el `.jks` (llave exclusiva de esta entrega), el APK firmado y su configuración van en el repositorio; no reutilices esa llave en otra app.
 Versión actual: `versionName 1.0.0`, `versionCode 1` (sube `versionCode` con cada entrega). El build release tiene la minificación desactivada.
