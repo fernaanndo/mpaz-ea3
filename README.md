@@ -1,4 +1,7 @@
-# MPAZ PRO 3° — Proyecto de la Experiencia 3 (integración con servidor)
+# MPAZ PRO 3° — Grupo 06
+
+Aplicación Android de gestión académica para la **Escuela Escritora Marcela Paz**.
+Asignatura **DSY1105**, sección **007V** · Evaluación Parcial 3 (EP3).
 
 Aplicación Android (Kotlin, Jetpack Compose con Material 3, MVVM con `ViewModel` + `StateFlow` y Room) para el
 apoyo pedagógico de 3° básico en cuatro asignaturas. El proyecto trae **todos los requerimientos funcionales del
@@ -7,8 +10,17 @@ Retrofit que debes completar para que la app trabaje contra un servidor (API RES
 prueba de interfaz y la generación de un APK firmado. Un interruptor **Modo local / Modo servidor** (sección 5) permite
 alternar entre las dos formas de trabajar sin recompilar.
 
-El servidor ya está hecho: se entrega aparte, en el archivo `..._Backend.zip` (carpeta `backend/`, Node + Express, sin
-base de datos externa). Tu trabajo es la **app**.
+## Integrantes
+
+| Integrante | Usuario de GitHub | Aporte en esta entrega |
+|---|---|---|
+| Fernando |  | Repositorio, ramas, arreglo de compilación, revisión de PR y entrega final |
+| Felipe | [FelipeCassaretto](https://github.com/FelipeCassaretto) | APK firmado (llave `.jks`, `keystore.properties`, capturas) |
+| Jean | [Jeanrenel92](https://github.com/Jeanrenel92) | Pruebas unitarias nuevas (`ContenidosUtpLocalTest`) |
+| Bayron | [B4yr0n-web](https://github.com/B4yr0n-web) | README de la entrega y bitácora técnica de firma |
+
+---
+
 
 ## 1. Descripción del caso
 
@@ -223,11 +235,34 @@ Pruebas unitarias JVM (JUnit 4, sin emulador) en `app/src/test`:
 El reporte queda en `app/build/reports/tests/testDebugUnitTest/index.html`. Las pruebas del servidor están en `backend/test`
 (`cd backend && npm test`).
 
-## 9. Cómo generar el APK firmado
+## 9. ## APK firmado
 
-El repositorio **no contiene llaves ni contraseñas**. La firma es opcional: sin datos de firma, `./gradlew assembleRelease`
-genera un APK sin firmar (`app-release-unsigned.apk`). Los pasos completos (crear el `.jks`, firmas V1 y V2, instalar,
-verificar y registrar la bitácora) están en la guía de la actividad, Parte 6. En resumen:
+El APK de la entrega está firmado con esquemas **V1 (JAR)** y **V2 (APK Signature Scheme v2)**.
+
+**Ubicaciones:**
+
+| Elemento | Ruta |
+|---|---|
+| Llave de firma | `app/keystore/mpazpro3-release.jks` |
+| Datos de la llave | `keystore.properties` (raíz del proyecto) |
+| APK firmado | `entrega/app-release.apk` |
+
+**Pasos para generarlo:**
+
+1. Crear la llave en Android Studio (**Build → Generate Signed App Bundle / APK → APK → Create new…**) o con `keytool`:
+   ```bash
+   keytool -genkeypair -v -keystore app/keystore/mpazpro3-release.jks -alias mpazpro3 -keyalg RSA -keysize 2048 -validity 9125
+   ```
+2. Crear `keystore.properties` en la raíz (basado en `keystore.properties.example`):
+   ```properties
+   MPAZPRO_STORE_FILE=keystore/mpazpro3-release.jks
+   MPAZPRO_STORE_PASSWORD=...
+   MPAZPRO_KEY_ALIAS=mpazpro3
+   MPAZPRO_KEY_PASSWORD=...
+   ```
+3. `build.gradle.kts` lee esos datos en `signingConfigs.release` y los aplica a `buildTypes.release`.
+4. Generar el APK: `./gradlew assembleRelease`. Queda en `app/build/outputs/apk/release/app-release.apk` y se copia a `entrega/`.
+5. Verificar la firma con `apksigner verify --verbose --print-certs app-release.apk`: debe indicar `v1 scheme: true` y `v2 scheme: true`.
 
 1. Crear una llave propia (una sola vez, exclusiva para esta entrega):
 
