@@ -1,3 +1,4 @@
+import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -8,7 +9,7 @@ plugins {
 
 // Datos de firma opcionales: archivo "keystore.properties" en la raíz del proyecto (ver
 // keystore.properties.example). Está en .gitignore: nunca se sube al repositorio.
-val propiedadesDeFirma = java.util.Properties().apply {
+val propiedadesDeFirma = Properties().apply {
     val archivo = rootProject.file("keystore.properties")
     if (archivo.isFile) archivo.inputStream().use { load(it) }
 }
